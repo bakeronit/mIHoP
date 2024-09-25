@@ -1,0 +1,10 @@
+taxonomy_file:
+  /home/sullivanmit/db/final_database/cmdd_taxonomy/taxonomy.tsv
+database_dir:
+  /home/sullivanmit/db/final_database/cmdd_bwa_index
+hostile_minimap2_index:
+  /home/sullivanmit/.local/share/hostile/human-t2t-hla
+number_database_files:
+  423
+threads:
+  8
