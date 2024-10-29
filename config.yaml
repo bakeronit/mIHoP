@@ -8,3 +8,5 @@ number_database_files:
   423
 threads:
   8
+threads_align:
+  4

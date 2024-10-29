@@ -12,7 +12,7 @@ onerror:
 
 rule all:
     input:
-        expand("lbbc/{sample}.{ext}", sample=config["sample_name"], ext=["tblat.1", "grammy", "gi_tax_info.tab"])
+        expand("lbbc/{sample}.bins", sample=config["sample_name"], ext=["tblat.1", "grammy", "gi_tax_info.tab"])
 
 rule trim_reads:
     params:
@@ -73,30 +73,49 @@ rule align:
     threads:
         config["threads_align"]
     shell:
-        "minimap2 -t {threads} -N 1000000 {params.database_dir}/cmdd.{dbnum}.bwa.fa.gz {input.read1} | gzip > {output.bam1} && "
-        "minimap2 -t {threads} -N 1000000 {params.database_dir}/cmdd.{dbnum}.bwa.fa.gz {input.read2} | gzip > {output.bam2}"
+        "minimap2 -t {threads} -N 1000000 {params.database_dir}/cmdd.{wildcards.dbnum}.bwa.fa.gz {input.read1} | gzip > {output.paf1} && "
+        "minimap2 -t {threads} -N 1000000 {params.database_dir}/cmdd.{wildcards.dbnum}.bwa.fa.gz {input.read2} | gzip > {output.paf2}"
+
+
+def aggregate_input_R1(wildcards):
+     return expand("alignments/{sample}.R1.{dbnum}.paf.gz", sample=wildcards.sample, dbnum=[x for x in range(config["number_database_files"])])
+
+def aggregate_input_R2(wildcards):
+     return expand("alignments/{sample}.R2.{dbnum}.paf.gz", sample=wildcards.sample, dbnum=[x for x in range(config["number_database_files"])])
 
 rule merge_bams:
     input:
-        bam1 = expand("alignments/{sample}.R1.{dbnum}.paf.gz", dbnum=[x for x in range(config["number_database_files"])]),
-        bam2 = expand("alignments/{sample}.R2.{dbnum}.paf.gz", dbnum=[x for x in range(config["number_database_files"])])
+        paf1 = aggregate_input_R1,
+        paf2 = aggregate_input_R2
     output:
-        bam1 = "alignments/{sample}_R1.paf",
-        bam2 = "alignments/{sample}_R2.paf"
+        paf1 = "alignments/{sample}_R1.paf.gz",
+        paf2 = "alignments/{sample}_R2.paf.gz"
     threads:
         config["threads"]
     run:
-        shell("zcat {} | sort | gzip > {}".format(" ".join(input.bam1), output.bam1))
-        shell("zcat {} | sort | gzip > {}".format(" ".join(input.bam2), output.bam2))
+        shell("zcat {} | sort | gzip > {}".format(" ".join(input.paf1), output.paf1))
+        shell("zcat {} | sort | gzip > {}".format(" ".join(input.paf2), output.paf2))
 
 
-rule combine_bams:
+rule combine_pafs:
     input:
-        bam1 = "alignments/{sample}_R1.bam",
-        bam2 = "alignments/{sample}_R2.bam"
+        paf1 = "alignments/{sample}_R1.paf.gz",
+        paf2 = "alignments/{sample}_R2.paf.gz"
+    params:
+        taxonomy_file = config["taxonomy_file"]
     output:
-        bam = "final_alignment/{sample}.bam"
+        alignment = "final_alignment/{sample}.align.gz"
     script:
         "scripts/combine.py"
 
+rule bin_alignments:
+    input:
+        alignment = "final_alignment/{sample}.align.gz" 
+    output:
+        bins = "bins/{sample}.bins"
+    script:
+        "scripts/bin.py"
 
+rule process_bins:
+    input:
+        paf = expand("bins/{sample}.bins", sample=config["sample_name"])

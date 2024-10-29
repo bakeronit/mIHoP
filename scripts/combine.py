@@ -6,7 +6,7 @@ min_length_frac = 0.8
 min_ident = 0.9
 
 tax_dict = {}
-genome_counts = defaultdict(lambda x:0)
+genome_counts = defaultdict(lambda:0)
 
 with open(snakemake.params.taxonomy_file) as f:
     for line in f:
@@ -14,8 +14,7 @@ with open(snakemake.params.taxonomy_file) as f:
         tax_dict[accession] = tax
         genome_counts[tax] += 1
 
-
-with gzip.open(snakemake.output.paf, 'wt') as o, gzip.open(snakemake.input.paf1) as f1, gzip.open(snakemake.input.paf2) as f2:
+with gzip.open(snakemake.output.alignment, 'wt') as o, gzip.open(snakemake.input.paf1, 'rt') as f1, gzip.open(snakemake.input.paf2, 'rt') as f2:
     # get first L read that passes min thresholds
     while True:
         line = f1.readline()
@@ -23,6 +22,8 @@ with gzip.open(snakemake.output.paf, 'wt') as o, gzip.open(snakemake.input.paf1)
             next_read_1 = None
             break
         read, read_len, read_start, read_end, strand, subject, sub_len, sub_start, sub_end, matches, length = line.split("\t")[:11]
+        if read.endswith('/1'):
+            read = read[:-2]
         matches, read_len, length, sub_start = int(matches), int(read_len), int(length), int(sub_start)
         if matches / length >= min_ident and length / read_len >= min_length_frac and length > min_length:
             next_read_1 = [read, read_len, subject, sub_start, matches, length]
@@ -34,24 +35,26 @@ with gzip.open(snakemake.output.paf, 'wt') as o, gzip.open(snakemake.input.paf1)
             next_read_2 = None
             break
         read, read_len, read_start, read_end, strand, subject, sub_len, sub_start, sub_end, matches, length = line.split("\t")[:11]
+        if read.endswith('/2'):
+            read = read[:-2]
         matches, read_len, length, sub_start = int(matches), int(read_len), int(length), int(sub_start)
         if matches / length >= min_ident and length / read_len >= min_length_frac and length > min_length:
             next_read_2 = [read, read_len, subject, sub_start, matches, length]
             break
-
     # read the rest of the alignment file
     while not next_read_1 is None and not next_read_2 is None:
         curr_read_1 = next_read_1
         curr_read_2 = next_read_2
-
         # If we are behind in L reads
         while curr_read_1[0] < curr_read_2[0]:
             line = f1.readline()
             if line == '':
                 next_read_1 = None
                 break
-            read, read_len, read_start, read_end, strand, subject, sub_len, sub_start, sub_end, matches, length = f1.readline().split(
+            read, read_len, read_start, read_end, strand, subject, sub_len, sub_start, sub_end, matches, length = line.split(
                 "\t")[:11]
+            if read.endswith('/1'):
+                read = read[:-2]
             matches, read_len, length, sub_start = int(matches), int(read_len), int(length), int(sub_start)
             if matches / length >= min_ident and length / read_len >= min_length_frac and length > min_length:
                 curr_read_1 = [read, read_len, subject, sub_start, matches, length]
@@ -64,21 +67,27 @@ with gzip.open(snakemake.output.paf, 'wt') as o, gzip.open(snakemake.input.paf1)
                 break
             read, read_len, read_start, read_end, strand, subject, sub_len, sub_start, sub_end, matches, length = line.split(
                 "\t")[:11]
+            if read.endswith('/2'):
+                read = read[:-2]
             matches, read_len, length, sub_start = int(matches), int(read_len), int(length), int(sub_start)
             if matches / length >= min_ident and length / read_len >= min_length_frac and length > min_length:
                 curr_read_2 = [read, read_len, subject, sub_start, matches, length]
         #if we're at the end of one of the alignment files and didn't find a match
         if next_read_1 is None or next_read_2 is None:
             break
+        next_read_1 = curr_read_1
+        next_read_2 = curr_read_2
 
         if curr_read_2[0] > curr_read_1[0]:
             # if the R read got in front of the L read search forward in the L reads
-            next_read_1 = curr_read_1
-            next_read_2 = curr_read_2
             continue
-
+        #print(curr_read_1[0], curr_read_2[0])
         # add the additional hits
         additional_hits_1 = []
+        if curr_read_1[0] == "NB501781:564:HJLJ2AFX7:1:11101:16200:10201":
+            print('#######################')
+            print(curr_read_1)
+            print(next_read_1)
         while next_read_1[0] == curr_read_1[0]:
             line = f1.readline()
             if line == '':
@@ -86,6 +95,8 @@ with gzip.open(snakemake.output.paf, 'wt') as o, gzip.open(snakemake.input.paf1)
                 break
             read, read_len, read_start, read_end, strand, subject, sub_len, sub_start, sub_end, matches, length = line.split(
                 "\t")[:11]
+            if read.endswith('/1'):
+                read = read[:-2]
             read_len, sub_start, matches, length = int(read_len), int(sub_start), int(matches), int(length)
             if matches / length >= min_ident and length / read_len >= min_length_frac and length > min_length:
                 next_read_1 = [read, read_len, subject, sub_start, matches, length]
@@ -99,12 +110,17 @@ with gzip.open(snakemake.output.paf, 'wt') as o, gzip.open(snakemake.input.paf1)
                 break
             read, read_len, read_start, read_end, strand, subject, sub_len, sub_start, sub_end, matches, length = line.split(
                 "\t")[:11]
+            if read.endswith('/2'):
+                read = read[:-2]
             read_len, sub_start, matches, length = int(read_len), int(sub_start), int(matches), int(length)
             if matches / length >= min_ident and length / read_len >= min_length_frac and length > min_length:
                 next_read_2 = [read, read_len, subject, sub_start, matches, length]
                 if next_read_2[0] == curr_read_2:
                     additional_hits_2.append(next_read_2)
-
+        if curr_read_1[0] == "NB501781:564:HJLJ2AFX7:1:11101:16200:10201":
+            print(curr_read_1[0], curr_read_2[0])
+            print(len(additional_hits_1), len(additional_hits_2))
+            print(next_read_2[0], next_read_1[0])
         # Process the alignments
         best_hit = [curr_read_1]
         accession_set_1 = set([curr_read_1[2].split("|")[0]])
@@ -153,7 +169,7 @@ with gzip.open(snakemake.output.paf, 'wt') as o, gzip.open(snakemake.input.paf1)
         for i in set(taxonomies):
             tax_out.append(i)
         tax_out = ','.join(tax_out)
-        o.write("\t".join([curr_read_1[0], tax_out, best_hit[0][2], best_hit[0][3], str(len(additional_hits_1)+1), core, repeat, shared, unmatched]) + "\n")
+        o.write("\t".join([curr_read_1[0], tax_out, best_hit[0][2], str(best_hit[0][3]), str(len(additional_hits_1)+1), core, repeat, shared, unmatched]) + "\n")
         
 
 
