@@ -10,9 +10,21 @@ onerror:
 
 
 
-rule all:
-    input:
-        expand("lbbc/{sample}.bins", sample=config["sample_name"], ext=["tblat.1", "grammy", "gi_tax_info.tab"])
+def get_samples(sample_name, sample_file):
+    if sample_file != "none" and sample_name != "none":
+        sys.exit("Please specify either sample_name OR sample_list")
+    elif sample_file != "none":
+        with open(sample_file) as f:
+            sample_list = []
+            for line in f:
+                if line.rstrip() != "":
+                    sample_list.append(line.rstrip())
+    elif not sample_name != "none":
+        sample_list = [sample_name]
+    else:
+        sys.exit("Please specify either sample_name or sample_list")
+    return sample_list
+
 
 rule trim_reads:
     params:
@@ -118,4 +130,4 @@ rule bin_alignments:
 
 rule process_bins:
     input:
-        paf = expand("bins/{sample}.bins", sample=config["sample_name"])
+        paf = expand("bins/{sample}.bins", sample=get_samples(config["sample_name"], config["sample_list"]))

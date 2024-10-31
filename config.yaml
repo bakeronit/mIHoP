@@ -10,3 +10,7 @@ threads:
   8
 threads_align:
   4
+sample_name:
+  none
+sample_list:
+  none
