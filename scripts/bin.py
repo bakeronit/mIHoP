@@ -25,7 +25,7 @@ with gzip.open(alignment_file, 'rt') as f:
     for line in f:
         read, species, chrom, pos, genomes_hit, core, repeat, shared, unmatched = line.rstrip().split("\t")
         pos = int(pos)
-        if core == "T" and repeat == "F" and shared == "F" and unmatched == "F":
+        if repeat == "F" and shared == "F" and unmatched == "F":
             bins[species][chrom][pos//bin_size] += 1
 
 
