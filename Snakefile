@@ -70,7 +70,7 @@ rule remove_host:
         config["threads"]
     run:
         if params.nohuman_db != "none":
-            shell("nohuman -t {threads} -D {params.nohuman_db} --out1 {out.put.read1} --out2 {output.read2} {input.read1} {intput.read2}")
+            shell("nohuman -t {threads} -D {params.nohuman_db} --out1 {output.read1} --out2 {output.read2} {input.read1} {input.read2}")
         else:
             shell("hostile clean --fastq1 {input.read1} --fastq2 {input.read2} --aligner minimap2 --index {params.hostile_minimap2_index}" \
         " --out-dir qc_reads --threads {threads}")
