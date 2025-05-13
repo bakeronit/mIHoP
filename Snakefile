@@ -62,12 +62,17 @@ rule remove_host:
         read1 = "qc_reads/{sample}_r1.clean_1.fastq.gz",
         read2 = "qc_reads/{sample}_r2.clean_2.fastq.gz"
     params:
-        hostile_minimap2_index = config["hostile_minimap2_index"]
+        hostile_minimap2_index = config["hostile_minimap2_index"],
+        nohuman_db = config["nohuman_database"]
     threads:
         config["threads"]
-    shell:
-        "hostile clean --fastq1 {input.read1} --fastq2 {input.read2} --aligner minimap2 --index {params.hostile_minimap2_index}" \
-        " --out-dir qc_reads --threads {threads}"
+    run:
+        if params.nohuman_db != "none":
+            shell("nohuman -t {threads} -D {params.nohuman_db} --out1 {out.put.read1} --out2 {output.read2} {input.read1} {intput.read2}")
+        else:
+            shell("hostile clean --fastq1 {input.read1} --fastq2 {input.read2} --aligner minimap2 --index {params.hostile_minimap2_index}" \
+        " --out-dir qc_reads --threads {threads}")
+
 
 
 

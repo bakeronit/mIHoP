@@ -4,6 +4,8 @@ database_dir:
   /home/sullivanmit/db/final_database/cmdd_bwa_index
 hostile_minimap2_index:
   /home/sullivanmit/.local/share/hostile/human-t2t-hla
+nohuman_database:
+  none
 number_database_files:
   423
 threads:
