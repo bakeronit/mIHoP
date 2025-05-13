@@ -1,18 +1,20 @@
 taxonomy_file:
-  /home/sullivanmit/db/final_database/cmdd_taxonomy/taxonomy.tsv
+  /data/metadb/mihop_taxonomy/taxonomy.tsv
 database_dir:
-  /home/sullivanmit/db/final_database/cmdd_bwa_index
+  /data/metadb/mihop_db
 hostile_minimap2_index:
-  /home/sullivanmit/.local/share/hostile/human-t2t-hla
+  /data/hostile/human-t2t-hla
 nohuman_database:
   none
 number_database_files:
   423
 threads:
-  8
+  2
 threads_align:
-  4
+  32
 sample_name:
   none
 sample_list:
   none
+read_length:
+  151

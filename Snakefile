@@ -28,7 +28,8 @@ def get_samples(sample_name, sample_file):
 
 rule trim_reads:
     params:
-        read_dir = config["read_dir"]
+        read_dir = config["read_dir"],
+        read_length= config["read_length"]
     output:
         read1 = "qc_reads/{sample}_r1.fq.gz",
         read2 = "qc_reads/{sample}_r2.fq.gz"
@@ -51,7 +52,8 @@ rule trim_reads:
         if read1 is None or read2 is None:
             sys.exit("Could't find read pairs in read directory.")
         subprocess.Popen("trimmomatic PE -threads {} {} {} {} /dev/null {} /dev/null "
-        "ILLUMINACLIP:TruSeq3-PE.fa:2:30:10:2:True LEADING:3 TRAILING:3 MINLEN:100".format(threads, read1, read2, output.read1, output.read2), shell=True).wait()
+        "ILLUMINACLIP:TruSeq3-PE.fa:2:30:10:2:True LEADING:3 TRAILING:3 MINLEN:{}".format(
+            threads, read1, read2, output.read1, output.read2, int(params.read_length*0.66)), shell=True).wait()
 
 
 rule remove_host:
