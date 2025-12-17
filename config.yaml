@@ -1,13 +1,13 @@
-taxonomy_file:
-  /data/metadb/mihop_taxonomy/taxonomy.tsv
 database_dir:
-  /data/metadb/mihop_db
+  /data/metadb/cmdb/fastas_dustmasked
+taxonomy_file:
+  /data/metadb/cmdb/taxonomy.tsv
 hostile_minimap2_index:
   /data/hostile/human-t2t-hla
 nohuman_database:
-  none
+  /data/metadb/nohuman/db
 number_database_files:
-  423
+  400
 threads:
   2
 threads_align:

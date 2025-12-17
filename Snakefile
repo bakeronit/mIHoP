@@ -92,8 +92,8 @@ rule align:
     threads:
         config["threads_align"]
     shell:
-        "minimap2 -t {threads} -N 1000000 {params.database_dir}/cmdd.{wildcards.dbnum}.bwa.fa.gz {input.read1} | gzip > {output.paf1} && "
-        "minimap2 -t {threads} -N 1000000 {params.database_dir}/cmdd.{wildcards.dbnum}.bwa.fa.gz {input.read2} | gzip > {output.paf2}"
+        "minimap2 -t {threads} -N 1000000 {params.database_dir}/cmdd.{wildcards.dbnum}.fa.gz {input.read1} | gzip > {output.paf1} && "
+        "minimap2 -t {threads} -N 1000000 {params.database_dir}/cmdd.{wildcards.dbnum}.fa.gz {input.read2} | gzip > {output.paf2}"
 
 
 def aggregate_input_R1(wildcards):
