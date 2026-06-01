@@ -87,8 +87,8 @@ rule align:
         read1 = "qc_reads/{sample}_r1.clean_1.fastq.gz",
         read2 = "qc_reads/{sample}_r2.clean_2.fastq.gz"
     output:
-        paf1 = "alignments/{sample}.R1.{dbnum}.paf.gz",
-        paf2 = "alignments/{sample}.R2.{dbnum}.paf.gz",
+        paf1 = temp("alignments/{sample}.R1.{dbnum}.paf.gz"),
+        paf2 = temp("alignments/{sample}.R2.{dbnum}.paf.gz"),
     threads:
         config["threads_align"]
     shell:
@@ -135,6 +135,13 @@ rule bin_alignments:
     script:
         "scripts/bin.py"
 
+
 rule process_bins:
     input:
-        paf = expand("bins/{sample}.bins", sample=get_samples(config["sample_name"], config["sample_list"]))
+        bins = expand("bins/{sample}.bins", sample=get_samples(config["sample_name"], config["sample_list"]))
+    output:
+        report = "reports/final_report.tsv"
+    params:
+        taxonomy_file = config["taxonomy_file"]
+    script:
+        "scripts/report.py"

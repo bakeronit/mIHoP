@@ -1,20 +1,26 @@
 database_dir:
-  /data/metadb/cmdb/fastas_dustmasked
+  /datassd/databases/cmdd_fastas_dustmasked
 taxonomy_file:
-  /data/metadb/cmdb/taxonomy.tsv
+  /datassd/databases/taxonomy.tsv
 hostile_minimap2_index:
   /data/hostile/human-t2t-hla
 nohuman_database:
-  /data/metadb/nohuman/db
+  /datassd/databases/nohuman/db
 number_database_files:
   400
 threads:
-  2
+  16
 threads_align:
-  32
+  4
 sample_name:
   none
 sample_list:
   none
 read_length:
   151
+gtdb_to_ncbi:
+  /datassd/databases/gtdb_to_ncbi.tsv
+pathogen_list:
+  /datassd/databases/pathogen_list.txt
+neg_control_samples:
+  auto

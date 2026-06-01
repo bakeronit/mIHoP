@@ -84,10 +84,6 @@ with gzip.open(snakemake.output.alignment, 'wt') as o, gzip.open(snakemake.input
         #print(curr_read_1[0], curr_read_2[0])
         # add the additional hits
         additional_hits_1 = []
-        if curr_read_1[0] == "NB501781:564:HJLJ2AFX7:1:11101:16200:10201":
-            print('#######################')
-            print(curr_read_1)
-            print(next_read_1)
         while next_read_1[0] == curr_read_1[0]:
             line = f1.readline()
             if line == '':
@@ -117,10 +113,6 @@ with gzip.open(snakemake.output.alignment, 'wt') as o, gzip.open(snakemake.input
                 next_read_2 = [read, read_len, subject, sub_start, matches, length]
                 if next_read_2[0] == curr_read_2:
                     additional_hits_2.append(next_read_2)
-        if curr_read_1[0] == "NB501781:564:HJLJ2AFX7:1:11101:16200:10201":
-            print(curr_read_1[0], curr_read_2[0])
-            print(len(additional_hits_1), len(additional_hits_2))
-            print(next_read_2[0], next_read_1[0])
         # Process the alignments
         best_hit = [curr_read_1]
         accession_set_1 = set([curr_read_1[2].split("|")[0]])
