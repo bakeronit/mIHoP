@@ -1,0 +1,20 @@
+samples: "config/samples.csv"
+
+platform: "illumina"
+
+fastp:
+ extra: "--cut_front --cut_tail --cut_window_size 4 --cut_mean_quality 20 --length_required 100"
+
+fastplong:
+ extra: "--length_required 100"
+
+hostile_minimap2_index: /datassd/hostile/human-t2t-hla
+nohuman_db: /datassd/databases/nohuman/db
+n_database_files: 100
+
+minimap:
+  extra: "-N 1000000"
+database_dir:
+  /datassd/databases/cmdd_fastas_dustmasked
+  
+taxonomy_file: /datassd/databases/taxonomy.tsv

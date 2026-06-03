@@ -96,7 +96,7 @@ with gzip.open(snakemake.output.alignment, 'wt') as o, gzip.open(snakemake.input
             read_len, sub_start, matches, length = int(read_len), int(sub_start), int(matches), int(length)
             if matches / length >= min_ident and length / read_len >= min_length_frac and length > min_length:
                 next_read_1 = [read, read_len, subject, sub_start, matches, length]
-                if next_read_1[0] == curr_read_1:
+                if next_read_1[0] == curr_read_1: #REVIEW: comparing a string to list? addtional_hits_1 will always be empty
                     additional_hits_1.append(next_read_1)
         additional_hits_2 = []
         while next_read_2[0] == curr_read_2[0]:
@@ -111,12 +111,12 @@ with gzip.open(snakemake.output.alignment, 'wt') as o, gzip.open(snakemake.input
             read_len, sub_start, matches, length = int(read_len), int(sub_start), int(matches), int(length)
             if matches / length >= min_ident and length / read_len >= min_length_frac and length > min_length:
                 next_read_2 = [read, read_len, subject, sub_start, matches, length]
-                if next_read_2[0] == curr_read_2:
+                if next_read_2[0] == curr_read_2:  #REVIEW: same as above, comparing a string to list? addtional_hits_2 will always be empty
                     additional_hits_2.append(next_read_2)
         # Process the alignments
         best_hit = [curr_read_1]
-        accession_set_1 = set([curr_read_1[2].split("|")[0]])
-        for i in additional_hits_1:
+        accession_set_1 = set([curr_read_1[2].split("|")[0]])  
+        for i in additional_hits_1:                                 
             read, read_len, subject, sub_start, matches, length = i
             accession = subject.split("|")[0]
             if matches/length > best_hit[0][4]/best_hit[0][5]:
@@ -127,7 +127,7 @@ with gzip.open(snakemake.output.alignment, 'wt') as o, gzip.open(snakemake.input
                 best_hit.append(i)
             accession_set_1.add(accession)
         best_hit_1 = best_hit
-        best_hit = [curr_read_2]
+        best_hit = [curr_read_2]  #REVIEW: overwriting best_hit from the L read with the R read, but did nothing with the best_hit_1 variable that was just created
         accession_set_2 = set([curr_read_2[2].split("|")[0]])
         for i in additional_hits_2:
             read, read_len, subject, sub_start, matches, length = i
@@ -140,8 +140,8 @@ with gzip.open(snakemake.output.alignment, 'wt') as o, gzip.open(snakemake.input
                 best_hit.append(i)
             accession_set_2.add(accession)
         bets_hit_2 = best_hit
-        if len(accession_set_1) == len(additional_hits_1)+1 or len(accession_set_2) == len(additional_hits_2) + 1:
-            repeat = "F"
+        if len(accession_set_1) == len(additional_hits_1) + 1 or len(accession_set_2) == len(additional_hits_2) + 1:
+            repeat = "F"     #REVIEW: here the repeat will always be "F" because of the bugs in the code above where additional_hits_1 and additional_hits_2 will always be empty, so len(accession_set_1) will always be 1 more than len(addtional_hits_1) and same for 2. So repeat will always be "F" and never "T"
         else:
             repeat = "T"
         taxonomies = []
@@ -156,12 +156,12 @@ with gzip.open(snakemake.output.alignment, 'wt') as o, gzip.open(snakemake.input
         elif len(set(taxonomies)) > 1:
             shared = "T"
         else:
-            unmatched = "T"
+            unmatched = "T"  #REVIEW: this shouldn't happend? what is unmatched? 
         tax_out = []
         for i in set(taxonomies):
             tax_out.append(i)
         tax_out = ','.join(tax_out)
-        o.write("\t".join([curr_read_1[0], tax_out, best_hit[0][2], str(best_hit[0][3]), str(len(additional_hits_1)+1), core, repeat, shared, unmatched]) + "\n")
+        o.write("\t".join([curr_read_1[0], tax_out, best_hit[0][2], str(best_hit[0][3]), str(len(additional_hits_1)+1), core, repeat, shared, unmatched]) + "\n")  #REVIEW: why the length of hits of r1 is records as number of hits?
         
 
 
