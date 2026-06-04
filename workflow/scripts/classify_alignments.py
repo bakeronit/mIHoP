@@ -1,5 +1,6 @@
 import gzip
 import csv
+import sys
 from collections import defaultdict
 from dataclasses import dataclass
 import pandas as pd
@@ -28,43 +29,51 @@ def load_taxonomy(taxonomy_file):
     return taxonomy_of_accession, accession_counts_per_tax
 
 
-def group_alignments(alignments: list, taxonomy_of_accession: dict, accession_counts_per_tax: defaultdict[int], paired: bool=True):
+def group_alignments(alignments: list, taxonomy_of_accession: dict, accession_counts_per_tax: defaultdict[int], paired: bool=True) -> ReadAlignment | None:
     is_core = is_unmatched = is_shared = False
     has_left = any(row['query_name'].endswith("/1") for row in alignments)
     has_right = any(row['query_name'].endswith("/2") for row in alignments)
     if paired and not (has_left and has_right):
-        return False, None  # don't keep this read, if not both mates aligned.
+        return None  #NOTE: for paired-end reads, both ends have to be aligned.
     
     df = pd.DataFrame(alignments)
-    accessions = [t.split("|")[0] for t in df['target_name'].to_list() ]
-    taxonomies = [ taxonomy_of_accession.get(acc, None) for acc in accessions ]
-    taxonomies = [ tax for tax in taxonomies if tax is not None ]
+    df['accession'] = df['target_name'].apply(lambda x: x.split("|")[0])
+    df['taxonomy'] = df['accession'].apply(lambda acc: taxonomy_of_accession.get(acc, None))
+    df = df[df['taxonomy'].notnull()]  # filter out alignments to accessions that are not in the taxonomy file.
+    if df.empty:
+        return None
+    accessions = set(df['accession'].tolist())
+    taxonomies = set(df['taxonomy'].tolist())
 
-    if len(set(taxonomies)) == 1:
-        is_core = len(set(accessions)) == accession_counts_per_tax[taxonomies[0]]
-    elif len(set(taxonomies)) > 1:
+    if len(taxonomies) == 1:
+        is_core = len(accessions) == accession_counts_per_tax[list(taxonomies)[0]]
+    elif len(taxonomies) > 1:
         is_shared = True
     else:
-        is_unmatched = True  ## dead code?
+        is_unmatched = True  ## NOTE:only if it aligns to something that is not in the taxonomy file.
 
     if paired:
         df_r1 = df[df['query_name'].str.endswith("/1")]
-        accessions_r1 = [ t.split("|")[0] for t in df_r1['target_name'].to_list() ]
+        accessions_r1 = set(df_r1['accession'].tolist())
         df_r2 = df[df['query_name'].str.endswith("/2")]
-        accessions_r2 = [ t.split("|")[0] for t in df_r2['target_name'].to_list() ]
-        is_repeat = len(set(accessions_r1)) < len(accessions_r1) and len(set(accessions_r2)) < len(accessions_r2)
+        accessions_r2 = set(df_r2['accession'].tolist())
+        is_repeat = len(accessions_r1) < len(df_r1) and len(accessions_r2) < len(df_r2)
+        if accessions_r1.isdisjoint(accessions_r2) and len(taxonomies) > 1:
+            print(f"Warning: read {df.iloc[0]['query_name']} has no shared accessions between R1 and R2, could be chimeric fragment or mapped to homologous regions across genomes of the sam species")
     else:
-        is_repeat = len(set(accessions)) < len(accessions)
+        is_repeat = len(accessions) < len(df)
 
-    # get the best hit by the highest identity, and then the highest alignment block length, then mapq.
+    # NOTE: get the best hit by the highest identity, and then the highest alignment block length, then mapq.
     # still might have multiple best hits, try to pick the first one in a deterministic way (by target_name).
-    df['identity'] = df['matches'].astype(int) / df['length'].astype(int)
-    df_sorted = df.sort_values(by=['identity', 'length', 'mapq', 'target_name'], ascending=False)
+    #df['identity'] = df['matches'].astype(int) / df['length'].astype(int)
+    #df_sorted = df.sort_values(by=['identity', 'length', 'mapq', 'target_name'], ascending=False)  #NOTE: it might be better to sort based on num_of_matches, length, then mapq, without calculating identity, to avoid issues with very short alignments having high identity. 
+    df = df.astype({'matches': int, 'length': int, 'mapq': int})
+    df_sorted = df.sort_values(by=['matches', 'length', 'mapq', 'target_name'], ascending=[False, False, False, True])
     best_hit = df_sorted.iloc[0]
 
     read_alignment = ReadAlignment(
         read_name=best_hit['query_name'].replace("/1", "").replace("/2", ""),
-        taxon=','.join(set(taxonomies)),
+        taxon=','.join(taxonomies),
         best_hit_name=best_hit['target_name'],
         best_hit_start=int(best_hit['target_start']),
         matches=len(accessions),
@@ -74,20 +83,20 @@ def group_alignments(alignments: list, taxonomy_of_accession: dict, accession_co
         is_unmatched=is_unmatched
     )
 
-    return True, read_alignment
+    return read_alignment
 
 
 def main():
 
     # to make this code work for both snakemake and CLI.
     if "snakemake" in globals():
-        print("Running via Snakemake...")
+        print("Running via Snakemake...", file=sys.stderr)
         taxonomy_file = snakemake.input.taxonomy
         paf = snakemake.input.paf
         output = snakemake.output.tsv
         paired = snakemake.params.paired
     else:
-        print("Running as a standalone CLI script...")
+        print("Running as a standalone CLI script...", file=sys.stderr)
         import argparse
         parser = argparse.ArgumentParser(description="Classify reads based on their alignments to reference genomes.")
         parser.add_argument("-t", "--taxonomy_file", required=True, help="Path to the taxonomy file mapping accessions to taxonomies.")
@@ -100,9 +109,6 @@ def main():
         paf = args.paf
         output = args.output
         paired = args.paired
-    
-    if not output.endswith(".gz"):
-        output += ".gz"
 
     taxonomy_of_accession, accession_counts_per_tax = load_taxonomy(taxonomy_file)
     read_alignments = []
@@ -122,31 +128,31 @@ def main():
             elif current_read_base == read_base:
                 alignments.append(row)
             else:
-                keep, read_alignment = group_alignments(alignments, taxonomy_of_accession, accession_counts_per_tax, paired)
-                if keep:
+                read_alignment = group_alignments(alignments, taxonomy_of_accession, accession_counts_per_tax, paired)
+                if read_alignment:
                     read_alignments.append(read_alignment)
                 alignments = [row]
                 current_read_base = read_base
         
-        #alignments of the last read
-        keep, read_alignment = group_alignments(alignments, taxonomy_of_accession, accession_counts_per_tax, paired)
-        if keep:
+        # process alignments of the last read
+        read_alignment = group_alignments(alignments, taxonomy_of_accession, accession_counts_per_tax, paired)
+        if read_alignment:
             read_alignments.append(read_alignment)
 
-    with gzip.open(output, 'wt' ) as o:
+    with gzip.open(output, 'wt' ) if output.endswith(".gz") else open(output, 'wt') as o:
         writer = csv.writer(o, delimiter="\t")
         writer.writerow(["read_name", "taxonomies", "best_hit_name", "best_hit_start", "matches", "core", "repeat", "shared", "unmatched"])
-        for rl in read_alignments:
+        for read in read_alignments:
             writer.writerow([
-                rl.read_name, 
-                rl.taxon, 
-                rl.best_hit_name,
-                rl.best_hit_start,
-                rl.matches, 
-                rl.is_core, 
-                rl.is_repeat, 
-                rl.is_shared, 
-                rl.is_unmatched
+                read.read_name, 
+                read.taxon, 
+                read.best_hit_name,
+                read.best_hit_start,
+                read.matches, 
+                read.is_core, 
+                read.is_repeat, 
+                read.is_shared, 
+                read.is_unmatched
             ])
 
 if __name__ == "__main__":

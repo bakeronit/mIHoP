@@ -4,6 +4,8 @@ import os
 
 from snakemake.utils import validate
 
+validate(config, schema=workflow.source_path("../schemas/config.schema.yaml"))
+
 samplesheet = config['samples'] if Path(config['samples']).is_absolute() else f"{os.environ['PWD']}/{config['samples']}"
 sep = "\t" if samplesheet.endswith(".tsv") else ","
 samples = pd.read_csv(samplesheet, sep=sep, comment="#").set_index(
@@ -41,10 +43,11 @@ def get_trimmed(wildcards):
             f"results/fastp/{wildcards.sample}/{wildcards.sample}_R1.fastq.gz",
             f"results/fastp/{wildcards.sample}/{wildcards.sample}_R2.fastq.gz",
         ]
-    elif config['platform'] == "illumina":
-        return [f"results/fastp/{wildcards.sample}/{wildcards.sample}.fastq.gz"]
+    ## NOTE: we currently only support Illumina (paired-end) and Nanopore platforms. 
+    #elif config['platform'] == "illumina":
+    #    return [f"results/fastp/{wildcards.sample}/{wildcards.sample}.fastq.gz"]
     elif config['platform'] == "nanopore":
-        return [f"results/fastp/{wildcards.sample}/{wildcards.sample}.fastq.gz"]
+        return [f"results/fastplong/{wildcards.sample}/{wildcards.sample}.fastq.gz"]
     else:
         raise ValueError(f"Unsupported platform: {config['platform']}")
 

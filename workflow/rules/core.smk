@@ -8,6 +8,8 @@ rule classify_alignments:
     params:
         paired = config.get("platform", "") == "illumina" # Assume paired-end if platform is Illumina, single-end otherwise
     threads: 1
+    conda:
+        "../envs/py.yaml"
     script:
         "../scripts/classify_alignments.py"
 
@@ -20,5 +22,7 @@ rule genome_bin:
     params:
         bin_size = config.get("bin_size", 500)
     threads: 1
+    conda:
+        "../envs/py.yaml"
     script:
         "../scripts/bin.py"

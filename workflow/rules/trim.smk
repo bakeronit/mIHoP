@@ -13,6 +13,8 @@ rule trim_illumina_pe:
     log:
         "logs/fastp/{sample}.log"
     threads: 4
+    conda:
+        "../envs/fastp.yaml"
     shell:
         """
         fastp --thread {threads} \
@@ -37,6 +39,8 @@ rule trim_nanopore:
     log:
         "logs/fastplong/{sample}.log"
     threads: 4
+    conda:
+        "../envs/fastplong.yaml"
     shell:
         """
         fastplong --thread {threads} \

@@ -1,0 +1,16 @@
+executor: aws-batch
+reason: True
+jobs: 100
+keep-going: True
+show-failed-logs: True
+printshellcmds: True
+rerun-incomplete: True
+retries: 1
+
+default_resources:
+  runtime: "1h"
+  cpus_per_task: 2
+  mem_mb: 5000
+
+aws-batch-region: "ap-southeast-2"
+default-storage-provider: "s3"

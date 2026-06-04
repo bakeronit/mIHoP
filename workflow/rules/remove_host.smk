@@ -14,6 +14,8 @@ rule remove_host_nohuman_illumina_pe:
     log:
         "logs/nohuman/{sample}.log"
     threads: 12
+    conda:
+        "../envs/remove_host.yaml"
     shell:
         """
         nohuman --threads {threads} \
@@ -49,6 +51,8 @@ rule remove_host_hostile_illumina_pe:
     log:
         "logs/hostile/{sample}.log"
     threads: 12
+    conda:
+        "../envs/remove_host.yaml"
     shell:
         """
         hostile clean \
@@ -69,7 +73,7 @@ use rule remove_host_hostile_illumina_pe as remove_host_hostile_nanopore with:
     output:
         "results/hostile/{sample}/{sample}.clean.fastq.gz",
     params:
-        read_cmd = lambda w, output: f"--fastq1 {input[0]}",
+        read_cmd = lambda w, input: f"--fastq1 {input[0]}",
         outdir = "results/hostile/{sample}",
         index = config["hostile_minimap2_index"],
         aligner_args = "-x map-ont"

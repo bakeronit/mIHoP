@@ -1,3 +1,6 @@
+from snakemake.utils import min_version
+min_version("9.1") # aws-batch and kubernetes plugins require Snakemake 8.6.0 or higher, and s3 storage plugin requires Snakemake 9.1.0 or higher
+
 from pathlib import Path
 
 configfile: workflow.source_path("../config/config.yaml")

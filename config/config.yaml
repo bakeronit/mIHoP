@@ -1,20 +1,30 @@
+# Input
 samples: "config/samples.csv"
 
+# Sequencing platform: illumina or nanopore, current assuming paired-end reads for illumina, and single-end for nanopore.
 platform: "illumina"
 
+# Read trimming
 fastp:
- extra: "--cut_front --cut_tail --cut_window_size 4 --cut_mean_quality 20 --length_required 100"
+  extra: "--cut_front --cut_tail --cut_window_size 4 --cut_mean_quality 20 --length_required 100"
 
 fastplong:
- extra: "--length_required 100"
+  extra: "--length_required 100"
 
+# Host read removal
+# If nohuman_db is set, nohuman (k-mer based) is used instead of hostile (alignment based)
 hostile_minimap2_index: /datassd/hostile/human-t2t-hla
 nohuman_db: /datassd/databases/nohuman/db
-n_database_files: 100
+
+# Alignment
+database_dir: /datassd/databases/cmdd_fastas_dustmasked
+n_database_files: 10
+taxonomy_file: /datassd/databases/taxonomy.tsv
 
 minimap:
   extra: "-N 1000000"
-database_dir:
-  /datassd/databases/cmdd_fastas_dustmasked
-  
-taxonomy_file: /datassd/databases/taxonomy.tsv
+  min_length: 50
+  min_coverage: 0.8
+  min_identity: 0.9
+
+bin_size: 500
