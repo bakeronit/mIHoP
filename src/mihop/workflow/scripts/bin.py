@@ -13,6 +13,9 @@ else:
     mihop_out = sys.argv[2]
     bin_size = int(sys.argv[3])
 
+if bin_size <= 0:
+    raise ValueError("Bin size must be a positive integer.")
+
 
 with gzip.open(alignment_file, 'rt') if alignment_file.endswith('.gz') else open(alignment_file, 'rt') as f:
     f.readline()

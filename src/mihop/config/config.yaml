@@ -1,5 +1,5 @@
 # Input
-samples: "config/samples.csv"
+samples:
 
 # Sequencing platform: illumina or nanopore, current assuming paired-end reads for illumina, and single-end for nanopore.
 platform: "illumina"

@@ -59,7 +59,7 @@ def group_alignments(alignments: list, taxonomy_of_accession: dict, accession_co
         accessions_r2 = set(df_r2['accession'].tolist())
         is_repeat = len(accessions_r1) < len(df_r1) and len(accessions_r2) < len(df_r2)
         if accessions_r1.isdisjoint(accessions_r2) and len(taxonomies) > 1:
-            print(f"Warning: read {df.iloc[0]['query_name']} has no shared accessions between R1 and R2, could be chimeric fragment or mapped to homologous regions across genomes of the sam species")
+            print(f"Warning: read {df.iloc[0]['query_name'].replace('/1', '')} has no shared accessions between R1 and R2", file=sys.stderr)
     else:
         is_repeat = len(accessions) < len(df)
 
