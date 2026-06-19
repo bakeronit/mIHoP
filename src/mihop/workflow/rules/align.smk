@@ -50,6 +50,5 @@ rule filter_paf:
         csvtk cut -t -f1-12 {input} | \
         csvtk add-header -H -t \
             --names "query_name,query_len,query_start,query_end,strand,target_name,target_len,target_start,target_end,matches,length,mapq" | \
-        csvtk filter2 -t -f '$length > {params.min_length} && $matches / $length > {params.min_identity} && $length / $query_len > {params.min_coverage}' | \
-        gzip > {output}
+        csvtk filter2 -t -f '$length > {params.min_length} && $matches / $length > {params.min_identity} && $length / $query_len > {params.min_coverage}' -o {output}
         """
