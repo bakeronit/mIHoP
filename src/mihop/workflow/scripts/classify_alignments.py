@@ -112,8 +112,11 @@ def main():
 
     taxonomy_of_accession, accession_counts_per_tax = load_taxonomy(taxonomy_file)
     read_alignments = []
-    with gzip.open(paf, 'rt') as fh:
+    with gzip.open(paf, 'rt') as fh, gzip.open(output, 'wt') if output.endswith('.gz') else open(output, 'wt') as out:
         reader = csv.DictReader(fh, delimiter="\t")
+        writer = csv.writer(out, delimiter="\t")
+        writer.writerow(["read_name", "taxonomies", "best_hit_name", "best_hit_start", "matches", "core", "repeat", "shared", "unmatched"])
+
         current_read_base = None
         alignments = []
         for row in reader:
@@ -130,29 +133,33 @@ def main():
             else:
                 read_alignment = group_alignments(alignments, taxonomy_of_accession, accession_counts_per_tax, paired)
                 if read_alignment:
-                    read_alignments.append(read_alignment)
+                    writer.writerow([
+                        read_alignment.read_name,
+                        read_alignment.taxon,
+                        read_alignment.best_hit_name,
+                        read_alignment.best_hit_start,
+                        read_alignment.matches,
+                        read_alignment.is_core,
+                        read_alignment.is_repeat,
+                        read_alignment.is_shared,
+                        read_alignment.is_unmatched
+                    ])
                 alignments = [row]
                 current_read_base = read_base
         
         # process alignments of the last read
         read_alignment = group_alignments(alignments, taxonomy_of_accession, accession_counts_per_tax, paired)
         if read_alignment:
-            read_alignments.append(read_alignment)
-
-    with gzip.open(output, 'wt' ) if output.endswith(".gz") else open(output, 'wt') as o:
-        writer = csv.writer(o, delimiter="\t")
-        writer.writerow(["read_name", "taxonomies", "best_hit_name", "best_hit_start", "matches", "core", "repeat", "shared", "unmatched"])
-        for read in read_alignments:
             writer.writerow([
-                read.read_name, 
-                read.taxon, 
-                read.best_hit_name,
-                read.best_hit_start,
-                read.matches, 
-                read.is_core, 
-                read.is_repeat, 
-                read.is_shared, 
-                read.is_unmatched
+                read_alignment.read_name,
+                read_alignment.taxon,
+                read_alignment.best_hit_name,
+                read_alignment.best_hit_start,
+                read_alignment.matches,
+                read_alignment.is_core,
+                read_alignment.is_repeat,
+                read_alignment.is_shared,
+                read_alignment.is_unmatched
             ])
 
 if __name__ == "__main__":
