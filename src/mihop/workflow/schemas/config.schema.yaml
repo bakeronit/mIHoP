@@ -45,7 +45,6 @@ properties:
       path to the nohuman k-mer database directory; when set, nohuman is used
       instead of hostile for host read removal
 
-
   database_dir:
     type: string
     description: path to the directory containing split reference FASTA files (cmdd.{n}.fa.gz)
@@ -76,7 +75,7 @@ properties:
       min_length:
         type: integer
         description: minimum alignment length to retain after filtering
-        default: 400
+        default: 50
         minimum: 1
       min_coverage:
         type: number

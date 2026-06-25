@@ -28,7 +28,6 @@ def load_taxonomy(taxonomy_file):
             accession_counts_per_tax[taxonomy] += 1
     return taxonomy_of_accession, accession_counts_per_tax
 
-
 def group_alignments(alignments: list, taxonomy_of_accession: dict, accession_counts_per_tax: defaultdict[int], paired: bool=True) -> ReadAlignment | None:
     is_core = is_unmatched = is_shared = False
     has_left = any(row['query_name'].endswith("/1") for row in alignments)

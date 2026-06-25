@@ -15,7 +15,7 @@ rule remove_host_nohuman_illumina_pe:
         "logs/nohuman/{sample}.log"
     threads: 12
     conda:
-        "../envs/remove_host.yaml"
+        "../envs/nohuman.yaml"
     shell:
         """
         nohuman --threads {threads} \
@@ -52,7 +52,7 @@ rule remove_host_hostile_illumina_pe:
         "logs/hostile/{sample}.log"
     threads: 12
     conda:
-        "../envs/remove_host.yaml"
+        "../envs/hostile.yaml"
     shell:
         """
         hostile clean \

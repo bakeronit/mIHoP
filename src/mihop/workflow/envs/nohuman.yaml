@@ -1,7 +1,6 @@
-name: remove_host
+name: nohuman
 channels:
   - conda-forge
   - bioconda
 dependencies:
   - nohuman=0.5.1
-  - hostile=2.0.2

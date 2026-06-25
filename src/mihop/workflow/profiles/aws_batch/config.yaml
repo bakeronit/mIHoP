@@ -4,7 +4,7 @@ keep-going: True
 show-failed-logs: True
 printshellcmds: True
 rerun-incomplete: True
-jobs: 100
+jobs: 500
 retries: 1
 
 default_resources:

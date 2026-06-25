@@ -6,8 +6,8 @@ rule trim_illumina_pe:
             "results/fastp/{sample}/{sample}_R1.fastq.gz",
             "results/fastp/{sample}/{sample}_R2.fastq.gz",
         ],
-        html      = report("results/fastp/{sample}/{sample}.html"),
-        json      = "results/fastp/{sample}/{sample}.json",
+        html    = report("results/fastp/{sample}/{sample}.html"),
+        json    = "results/fastp/{sample}/{sample}.json",
     params:
         extra = config["fastp"]["extra"]
     log:
