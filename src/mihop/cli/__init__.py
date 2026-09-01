@@ -9,7 +9,7 @@ from snk_cli import CLI
 mihop = CLI(Path(__file__).parent.parent)
 
 @mihop.app.command()
-def metadb(directory: str = "."):
+def metadb(directory: str|Path = "."):
     """
     Download clinical meta DB from s3
     """
@@ -17,7 +17,7 @@ def metadb(directory: str = "."):
     print(f"Downloading clinical meta DB from {s3_url}..., to {directory}")
 
 @mihop.app.command()
-def prepare(fastq_dir: str, output: str = "samples.csv") -> Path:
+def prepare(fastq_dir: str|Path, output: str|Path = "samples.csv") -> Path:
     """
     Generate a samplesheet from FASTQ files found in `fastq_dir`.
     """

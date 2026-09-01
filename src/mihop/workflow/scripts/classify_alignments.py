@@ -1,5 +1,5 @@
-import gzip
 import csv
+import gzip
 import sys
 from collections import defaultdict
 from dataclasses import dataclass
@@ -110,7 +110,6 @@ def main():
         paired = args.paired
 
     taxonomy_of_accession, accession_counts_per_tax = load_taxonomy(taxonomy_file)
-    read_alignments = []
     with gzip.open(paf, 'rt') as fh, gzip.open(output, 'wt') if output.endswith('.gz') else open(output, 'wt') as out:
         reader = csv.DictReader(fh, delimiter="\t")
         writer = csv.writer(out, delimiter="\t")
@@ -120,9 +119,8 @@ def main():
         alignments = []
         for row in reader:
             read = row['query_name']
-            if paired:
-                if not read.endswith("/1") and not read.endswith("/2"):
-                    raise ValueError(f"Read {read} does not end with /1 or /2, but paired_mode is True")
+            if paired and not read.endswith(("/1", "/2")):
+                raise ValueError(f"Read {read} does not end with /1 or /2, but paired_mode is True")
             read_base = read.replace("/1", "").replace("/2", "")
             if current_read_base is None:
                 alignments.append(row)
