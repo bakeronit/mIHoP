@@ -1,0 +1,99 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+
+description: configuration for the mIHoP workflow
+type: object
+additionalProperties: false
+
+properties:
+
+  samples:
+    type: string
+    description: path to the sample sheet (CSV or TSV)
+
+  platform:
+    type: string
+    description: sequencing platform
+    enum:
+      - illumina
+      - nanopore
+
+  fastp:
+    type: object
+    description: options for fastp (Illumina read QC)
+    additionalProperties: false
+    properties:
+      extra:
+        type: string
+        description: additional CLI arguments passed to fastp
+
+  fastplong:
+    type: object
+    description: options for fastplong (Nanopore read QC)
+    additionalProperties: false
+    properties:
+      extra:
+        type: string
+        description: additional CLI arguments passed to fastplong
+
+  hostile_minimap2_index:
+    type: string
+    description: path to the hostile human-read depletion minimap2 index
+
+  nohuman_db:
+    type: string
+    description: >
+      path to the nohuman k-mer database directory; when set, nohuman is used
+      instead of hostile for host read removal
+
+  database_dir:
+    type: string
+    description: path to the directory containing split reference FASTA files (cmdd.{n}.fa.gz)
+
+  n_database_files:
+    type: integer
+    description: number of split reference database files
+    minimum: 1
+
+  taxonomy_file:
+    type: string
+    description: path to the taxonomy TSV file
+
+  bin_size:
+    type: integer
+    description: genomic bin size (bp) used when counting covered bins per species
+    default: 500
+    minimum: 1
+
+  minimap:
+    type: object
+    description: options for minimap2 alignment and PAF filtering
+    additionalProperties: false
+    properties:
+      extra:
+        type: string
+        description: additional CLI arguments passed to minimap2
+      min_length:
+        type: integer
+        description: minimum alignment length to retain after filtering
+        default: 50
+        minimum: 1
+      min_coverage:
+        type: number
+        description: minimum fraction of the query length covered by the alignment (0–1)
+        default: 0.8
+        minimum: 0
+        maximum: 1
+      min_identity:
+        type: number
+        description: minimum fraction of matching bases in the alignment (matches / alignment length, 0–1)
+        default: 0.9
+        minimum: 0
+        maximum: 1
+
+required:
+  - samples
+  - platform
+  - hostile_minimap2_index
+  - n_database_files
+  - database_dir
+  - taxonomy_file

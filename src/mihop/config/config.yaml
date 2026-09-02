@@ -1,0 +1,30 @@
+# Samplesheet, see schemas/samples.schema.yaml
+samples:
+
+#  illumina or nanopore, current assuming paired-end reads for illumina, and single-end for nanopore.
+platform: "illumina"
+
+# Read trimming
+fastp:
+  extra: "--cut_front --cut_tail --cut_window_size 4 --cut_mean_quality 20 --length_required 100 --low_complexity_filter"
+
+fastplong:
+  extra: "--length_required 100 --low_complexity_filter"
+
+# Host read removal
+# If nohuman_db is set, nohuman (k-mer based) is used instead of hostile (alignment based)
+hostile_minimap2_index: 
+nohuman_db: 
+
+# Alignment
+database_dir: cmdd_fastas_dustmasked
+n_database_files: 460
+taxonomy_file: cmdd_fastas_dustmasked/taxonomy.tsv
+
+minimap:
+  extra: "-N 1000000"
+  min_length: 50
+  min_coverage: 0.8
+  min_identity: 0.9
+
+bin_size: 500

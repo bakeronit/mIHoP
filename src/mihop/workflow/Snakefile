@@ -1,0 +1,25 @@
+from snakemake.utils import min_version
+min_version("9.1") # aws-batch and kubernetes plugins require Snakemake 8.6.0 or higher, and s3 storage plugin requires Snakemake 9.1.0 or higher
+
+from pathlib import Path
+
+configfile: workflow.source_path("../config/config.yaml")
+
+include: "rules/common.smk"
+include: "rules/trim.smk"
+include: "rules/remove_host.smk"
+include: "rules/align.smk"
+include: "rules/core.smk"
+
+
+#TODO: Define the list of localrules for cloud execution for alignment steps. 
+
+#cloud_rules = {"minimap2_align"}
+#all_rule_names = {r.name for r in workflow.rules }
+#local_rules_list = all_rule_names - cloud_rules
+#localrules: all
+#workflow._localrules.update(local_rules_list)
+
+rule all:
+    input:
+        expand("results/mihop_core/{sample}/{sample}.bins", sample=samples.index)

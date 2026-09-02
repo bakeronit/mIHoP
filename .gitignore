@@ -1,0 +1,9 @@
+.snakemake/
+results/
+logs/
+.idea/
+__pycache__/
+*.pyc
+*.pyo
+**/.conda/
+

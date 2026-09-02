@@ -1,0 +1,6 @@
+name: nohuman
+channels:
+  - conda-forge
+  - bioconda
+dependencies:
+  - nohuman=0.5.1

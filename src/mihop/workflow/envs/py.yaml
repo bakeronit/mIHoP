@@ -1,0 +1,8 @@
+name: pandas
+channels:
+  - conda-forge
+dependencies:
+  - python=3.14
+  - pandas=3.0.1
+  - pip
+

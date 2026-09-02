@@ -1,0 +1,70 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "mihop"
+dynamic = ["version"]
+description = ''
+readme = "README.md"
+requires-python = ">=3.11"
+license = "GPL-3.0-only"
+keywords = []
+authors = [
+  { name = "mjsull", email = "Mitchell.Sullivan@health.qld.gov.au" },
+]
+classifiers = [
+  "Development Status :: 4 - Beta",
+  "Programming Language :: Python",
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12",
+  "Programming Language :: Python :: 3.13",
+  "Programming Language :: Python :: 3.14",
+  "Programming Language :: Python :: Implementation :: CPython",
+  "Programming Language :: Python :: Implementation :: PyPy",
+]
+dependencies = [
+  "pandas",
+  "snakemake>=9.1",
+  "snk-cli @git+https://github.com/bakeronit/snk-cli.git@b610060"
+]
+
+[project.urls]
+Documentation = "https://github.com/bakeronit/mIHoP#readme"
+Issues = "https://github.com/bakeronit/mIHoP/issues"
+Source = "https://github.com/bakeronit/mIHoP"
+
+[project.scripts]
+mihop = "mihop.cli:mihop"
+
+[tool.hatch.version]
+path = "src/mihop/__about__.py"
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.envs.types]
+extra-dependencies = [
+  "mypy>=1.0.0",
+]
+[tool.hatch.envs.types.scripts]
+check = "mypy --install-types --non-interactive {args:src/mihop tests}"
+
+[tool.coverage.run]
+source_pkgs = ["mihop", "tests"]
+branch = true
+parallel = true
+omit = [
+  "src/mihop/__about__.py",
+]
+
+[tool.coverage.paths]
+mihop = ["src/mihop", "*/mihop/src/mihop"]
+tests = ["tests", "*/mihop/tests"]
+
+[tool.coverage.report]
+exclude_lines = [
+  "no cov",
+  "if __name__ == .__main__.:",
+  "if TYPE_CHECKING:",
+]

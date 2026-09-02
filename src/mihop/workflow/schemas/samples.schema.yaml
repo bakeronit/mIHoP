@@ -1,0 +1,16 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+
+description: an entry in the sample sheet
+properties:
+  sample:
+    type: string
+    description: sample name/identifier
+  fastq_1:
+    type: string
+    description: path to the first FASTQ file (for paired-end data) or the only FASTQ file (for single-end data)
+  fastq_2: 
+    type: string
+    description: path to the second FASTQ file (for paired-end data); should be null or omitted for single-end data
+required:
+  - sample
+  - fastq_1
