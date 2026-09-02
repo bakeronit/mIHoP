@@ -40,9 +40,6 @@ mihop = "mihop.cli:mihop"
 [tool.hatch.version]
 path = "src/mihop/__about__.py"
 
-[tool.hatch.metadata]
-allow-direct-references = true
-
 [tool.hatch.envs.types]
 extra-dependencies = [
   "mypy>=1.0.0",
